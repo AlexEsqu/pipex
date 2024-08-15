@@ -6,7 +6,7 @@
 #    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2024/08/14 16:24:56 by mkling           ###   ########.fr        #
+#    Updated: 2024/08/15 17:14:44 by mkling           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,6 +46,9 @@ library:
 $(OBJ_DIR)/%.o:		$(SRC_DIR)/%.c
 					mkdir -p $(OBJ_DIR)
 					$(CC) $(CFLAGS) $(foreach dir,$(LIB_DIR), -I$(dir)) -c $< -o $@
+
+debug:		${OBJS} library
+			$(CC) $(CFLAGS) -g -o $(BIN_DIR)/$(NAME) $(SRCS) $(LIBS)
 
 clean:
 			rm -f $(OBJS) $(BOBJS)
