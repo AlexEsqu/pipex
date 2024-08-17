@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/17 13:29:45 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/17 14:58:29 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,10 @@ int	find_viable_path(t_command *cmd, char *paths)
 
 	possible_paths = ft_split(paths, ':');
 	free(paths);
-	while (*possible_paths++)
+	while (*possible_paths++ != NULL)
 	{
+		if (*possible_paths == NULL)
+			break ;
 		tested_path = ft_strjoin(*possible_paths, cmd->cmd_stem);
 		if (access(tested_path, F_OK | R_OK) == 0)
 		{
@@ -30,6 +32,7 @@ int	find_viable_path(t_command *cmd, char *paths)
 		else
 			free(tested_path);
 	}
+	perror("No viable path found to this command");
 	return (1);
 }
 
@@ -45,21 +48,23 @@ int	find_cmd_path(char **envp, t_command *cmd)
 		if (ft_strncmp(*envp, "PATH=", 5) == 0)
 		{
 			paths = ft_substr(*envp, 5, ft_strlen(*envp));
-			break ;
+			return (find_viable_path(cmd, paths));
 		}
 	}
-	find_viable_path(cmd, paths);
-	return (0);
+	cmd->cmd_path = NULL;
+	perror("No PATH variable found");
+	return (1);
 }
 
-int	parse_command(char *cmd_line, char **envp, t_command *cmd)
+int	parse_cmd(char *cmd_line, char **envp, t_command *cmd)
 {
 	cmd->cmd_argv = ft_split(cmd_line, ' ');
-	fprintf(stderr, "cmd.argv = %s\n", cmd->cmd_argv[1]);
+	if (cmd->cmd_argv == NULL || cmd->cmd_argv[0] == NULL)
+	{
+		perror("Wrong Command syntax");
+		return (1);
+	}
 	cmd->cmd_stem = ft_strjoin("/", cmd->cmd_argv[0]);
-	fprintf(stderr, "cmd.stem = %s\n", cmd->cmd_stem);
-	find_cmd_path(envp, cmd);
-	fprintf(stderr, "cmd.path = %s\n", cmd->cmd_path);
-	return (0);
+	return (find_cmd_path(envp, cmd));
 }
 

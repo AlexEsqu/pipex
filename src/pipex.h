@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/17 13:17:41 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/17 14:40:34 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,6 @@ typedef struct s_command {
 	char	*cmd_path;
 }	t_command;
 
-int	parse_command(char *cmd_line, char **envp, t_command *cmd);
+int	parse_cmd(char *cmd_line, char **envp, t_command *cmd);
 
 #endif

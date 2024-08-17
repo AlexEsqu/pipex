@@ -6,7 +6,7 @@
 #    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2024/08/17 13:33:30 by mkling           ###   ########.fr        #
+#    Updated: 2024/08/17 13:36:08 by mkling           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,7 +49,7 @@ debug:		${OBJS} library
 			$(CC) $(CFLAGS) -g -o $(BIN_DIR)/$(NAME) $(SRCS) $(LIBS)
 
 clean:
-			rm -rf $(OBJ_DIR)/$(OBJS) $(BOBJS)
+			rm -rf $(OBJ_DIR)/$(OBJS) $(BOBJS) $(OBJ_DIR)
 			$(MAKE) -C ./lib/libft clean
 			$(MAKE) -C ./lib/libftprintf clean
 
