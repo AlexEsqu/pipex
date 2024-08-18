@@ -6,13 +6,15 @@
 #    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2024/08/17 13:36:08 by mkling           ###   ########.fr        #
+#    Updated: 2024/08/17 15:16:52 by mkling           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		= pipex
 
 SRC_DIR		= ./src
+
+BUILD_DIR	= ./build
 
 BIN_DIR		= ./build/bin
 
@@ -34,8 +36,9 @@ CFLAGS		= -Wall -Wextra -Werror
 all:		${NAME}
 
 ${NAME}:	${OBJS} library
-			mkdir -p $(BIN_DIR)
-			$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $(SRCS) $(LIBS)
+			mkdir -p $(BUILD_DIR)
+			mkdir -p $(OBJ_DIR)
+			$(CC) $(CFLAGS) -o $(NAME) $(SRCS) $(LIBS)
 
 library:
 			$(MAKE) -C ./lib/libft
@@ -46,10 +49,10 @@ $(OBJ_DIR)/%.o:		$(SRC_DIR)/%.c
 					$(CC) $(CFLAGS) $(foreach dir,$(LIB_DIR), -I$(dir)) -c $< -o $@
 
 debug:		${OBJS} library
-			$(CC) $(CFLAGS) -g -o $(BIN_DIR)/$(NAME) $(SRCS) $(LIBS)
+			$(CC) $(CFLAGS) -g -o $(NAME) $(SRCS) $(LIBS)
 
 clean:
-			rm -rf $(OBJ_DIR)/$(OBJS) $(BOBJS) $(OBJ_DIR)
+			rm -rf $(OBJ_DIR)
 			$(MAKE) -C ./lib/libft clean
 			$(MAKE) -C ./lib/libftprintf clean
 

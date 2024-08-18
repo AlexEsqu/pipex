@@ -6,63 +6,65 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/17 15:00:11 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/18 16:15:14 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	reading_child_process(int fds[], t_command *cmd2, char **envp)
+int	pipe_out_child_process(char **argv, int pipe_fd[],
+	t_command *cmd2, char **envp)
 {
-	if (dup2(fds[0], STDIN_FILENO) == -1)
-	{
-		perror("Error while duplicating infile to stdin");
-		return (1);
-	}
-	close(fds[0]);
-	close(fds[1]);
+	int	outfile_fd;
+
+	outfile_fd = open(argv[OUTFILE], O_WRONLY | O_TRUNC);
+	if (outfile_fd == -1)
+		return (perror("Error while opening infile"), 1);
+	if (dup2(pipe_fd[READ], STDIN_FILENO) == -1)
+		return (perror("Error while redirecting pipe read to stdin"), 1);
+	close(pipe_fd[READ]);
+	close(pipe_fd[WRITE]);
+	if (dup2(outfile_fd, STDOUT_FILENO) == -1)
+		return (perror("Error while redirecting stdout to outfile"), 1);
+	close(outfile_fd);
 	execve(cmd2->cmd_path, cmd2->cmd_argv, envp);
-	perror("Error while executing reading command");
-	return (1);
+	return (perror("Error while executing reading command"), 1);
 }
 
-int	writing_child_process(int fds[], t_command *cmd1, char **envp)
+int	pipe_in_child_process(char **argv, int pipe_fd[],
+	t_command *cmd1, char **envp)
 {
-	if (dup2(fds[1], STDOUT_FILENO) == -1)
-	{
-		perror("Error while duplicating outfile to stdout");
-		return (1);
-	}
-	close(fds[1]);
-	close(fds[0]);
+	int	infile_fd;
+
+	infile_fd = open(argv[INFILE], O_RDONLY);
+	if (infile_fd == -1)
+		return (perror("Error while opening outfile"), 1);
+	if (dup2(pipe_fd[WRITE], STDOUT_FILENO) == -1)
+		return (perror("Error while redirecting pipe write to stdout"), 1);
+	close(pipe_fd[WRITE]);
+	close(pipe_fd[READ]);
 	execve(cmd1->cmd_path, cmd1->cmd_argv, envp);
-	perror("Error while executing writing command");
-	return (1);
+	return (perror("Error while executing writing command"), 1);
 }
 
-int	create_pipe(int fds[], t_command *cmd1, t_command *cmd2, char **envp)
+int	handle_pipe(char **argv, t_command *cmd1, t_command *cmd2, char **envp)
 {
 	int	pid_fork1;
 	int	pid_fork2;
+	int	pipe_fd[2];
 
-	if (pipe(fds) == -1)
-	{
-		perror("Error while creating pipe");
-		return (1);
-	}
+	if (pipe(pipe_fd) == -1)
+		return (perror("Error while creating pipe"), 1);
 	pid_fork1 = fork();
 	if (pid_fork1 == 0)
-		writing_child_process(fds, cmd1, envp);
+		pipe_in_child_process(argv, pipe_fd, cmd1, envp);
 	pid_fork2 = fork();
 	if (pid_fork2 == 0)
-		reading_child_process(fds, cmd2, envp);
-	close(fds[0]);
-	close(fds[1]);
+		pipe_out_child_process(argv, pipe_fd, cmd2, envp);
 	if (pid_fork1 == -1 || pid_fork2 == -1)
-	{
-		perror("Error while forking");
-		return (1);
-	}
+		return (perror("Error while forking"), 1);
+	close(pipe_fd[READ]);
+	close(pipe_fd[WRITE]);
 	waitpid(pid_fork1, NULL, 0);
 	waitpid(pid_fork2, NULL, 0);
 	return (0);
@@ -72,22 +74,13 @@ int	main(int argc, char **argv, char *envp[])
 {
 	t_command	cmd1;
 	t_command	cmd2;
-	int			files[2];
 
 	if (argc == 5)
 	{
-		if (parse_cmd(argv[2], envp, &cmd1) == 1
-			|| parse_cmd(argv[3], envp, &cmd2) == 1)
+		if (parse_cmd(argv[CMD_1], envp, &cmd1) == 1
+			|| parse_cmd(argv[CMD_2], envp, &cmd2) == 1)
 			return (1);
-		files[0] = open(argv[1], O_RDONLY);
-		files[1] = open(argv[4], O_WRONLY);
-		if (files[0] == -1 || files[1] == -1)
-		{
-			perror("Error while opening files");
-			return (1);
-		}
-		return (create_pipe(files, &cmd1, &cmd2, envp));
+		return (handle_pipe(argv, &cmd1, &cmd2, envp));
 	}
-	perror("Invalid number of arguments");
-	return (1);
+	return (perror("Invalid number of arguments"), 1);
 }

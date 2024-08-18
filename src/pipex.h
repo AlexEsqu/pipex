@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/17 14:40:34 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/18 14:34:12 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,18 @@
 # include "../lib/libft/libft.h"
 # include "../lib/libftprintf/ft_printf.h"
 
+enum e_file_type {
+	READ = 0,
+	WRITE = 1
+};
+
+enum e_argv_index {
+	PROGRAM_NAME = 0,
+	INFILE = 1,
+	CMD_1 = 2,
+	CMD_2 = 3,
+	OUTFILE = 4,
+};
 typedef struct s_command {
 	char	**cmd_argv;
 	char	*cmd_stem;
