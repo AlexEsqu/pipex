@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/19 11:17:32 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/19 12:15:08 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,9 @@ int	pipe_in_child_process(char **argv, int pipe_fd[],
 		return (perror("Error while redirecting pipe write to stdout"), 1);
 	close(pipe_fd[WRITE]);
 	close(pipe_fd[READ]);
+	if (dup2(infile_fd, STDIN_FILENO) == -1)
+		return (perror("Error while redirecting infile to stdin"), 1);
+	close(infile_fd);
 	execve(cmd1->cmd_path, cmd1->cmd_argv, envp);
 	return (perror("Error while executing writing command"), 1);
 }
