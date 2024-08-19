@@ -6,25 +6,26 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/18 17:02:12 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/19 11:15:45 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void free_array(char **array)
+void	free_array(char **array)
 {
-    int i = 0;
+	int	i;
 
-    if (array == NULL)
-        return;
+	i = 0;
+	if (array == NULL)
+		return ;
 
-    while (array[i] != NULL)
-    {
-        free(array[i]);
-        i++;
-    }
-    free(array);
+	while (array[i] != NULL)
+	{
+		free(array[i]);
+		i++;
+	}
+	free(array);
 }
 
 
@@ -85,5 +86,12 @@ int	parse_cmd(char *cmd_line, char **envp, t_command *cmd)
 	}
 	cmd->cmd_stem = ft_strjoin("/", cmd->cmd_argv[0]);
 	return (find_cmd_path(envp, cmd));
+}
+
+void	free_cmd(t_command *cmd)
+{
+	free_array(cmd->cmd_argv);
+	free(cmd->cmd_stem);
+	free(cmd->cmd_path);
 }
 

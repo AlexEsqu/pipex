@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/18 16:15:14 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/19 11:17:32 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ int	handle_pipe(char **argv, t_command *cmd1, t_command *cmd2, char **envp)
 	close(pipe_fd[WRITE]);
 	waitpid(pid_fork1, NULL, 0);
 	waitpid(pid_fork2, NULL, 0);
+	free_cmd(cmd1);
+	free_cmd(cmd2);
 	return (0);
 }
 
