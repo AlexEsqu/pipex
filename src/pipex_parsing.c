@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/19 11:15:45 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/20 18:00:06 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ void	free_array(char **array)
 	i = 0;
 	if (array == NULL)
 		return ;
-
 	while (array[i] != NULL)
 	{
 		free(array[i]);
@@ -28,8 +27,7 @@ void	free_array(char **array)
 	free(array);
 }
 
-
-int	find_viable_path(t_command *cmd, char *paths)
+int	check_viable_path(t_command *cmd, char *paths)
 {
 	char	*tested_path;
 	char	**possible_paths;
@@ -40,6 +38,7 @@ int	find_viable_path(t_command *cmd, char *paths)
 	i = 0;
 	while (possible_paths[i] != NULL)
 	{
+		tested_path = cmd->cmd_stem;
 		if (possible_paths[i] == NULL)
 			break ;
 		tested_path = ft_strjoin(possible_paths[i], cmd->cmd_stem);
@@ -57,7 +56,7 @@ int	find_viable_path(t_command *cmd, char *paths)
 	return (perror("No viable path found to this command"), 1);
 }
 
-int	find_cmd_path(char **envp, t_command *cmd)
+int	extract_path(char **envp, t_command *cmd)
 {
 	char	*paths;
 	int		i;
@@ -69,7 +68,7 @@ int	find_cmd_path(char **envp, t_command *cmd)
 		if (ft_strncmp(*envp, "PATH=", 5) == 0)
 		{
 			paths = ft_substr(*envp, 5, ft_strlen(*envp));
-			return (find_viable_path(cmd, paths));
+			return (check_viable_path(cmd, paths));
 		}
 	}
 	cmd->cmd_path = NULL;
@@ -85,7 +84,11 @@ int	parse_cmd(char *cmd_line, char **envp, t_command *cmd)
 		return (1);
 	}
 	cmd->cmd_stem = ft_strjoin("/", cmd->cmd_argv[0]);
-	return (find_cmd_path(envp, cmd));
+	if (access(cmd->cmd_stem, F_OK | R_OK) == 0)
+		cmd->cmd_path = ft_strdup(cmd->cmd_stem);
+	else
+		return (extract_path(envp, cmd));
+	return (0);
 }
 
 void	free_cmd(t_command *cmd)
@@ -94,4 +97,3 @@ void	free_cmd(t_command *cmd)
 	free(cmd->cmd_stem);
 	free(cmd->cmd_path);
 }
-

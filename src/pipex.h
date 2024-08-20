@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/19 11:17:37 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/20 18:21:40 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 # include <fcntl.h>
 # include <errno.h>
 # include "../lib/libft/libft.h"
-# include "../lib/libftprintf/ft_printf.h"
 
 enum e_file_type {
 	READ = 0,
@@ -39,6 +38,7 @@ typedef struct s_command {
 	char	**cmd_argv;
 	char	*cmd_stem;
 	char	*cmd_path;
+	int		cmd_exit_status;
 }	t_command;
 
 int		parse_cmd(char *cmd_line, char **envp, t_command *cmd);

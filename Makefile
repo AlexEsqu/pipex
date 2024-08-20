@@ -6,7 +6,7 @@
 #    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2024/08/17 15:16:52 by mkling           ###   ########.fr        #
+#    Updated: 2024/08/19 13:24:38 by mkling           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,11 +20,11 @@ BIN_DIR		= ./build/bin
 
 OBJ_DIR		= ./build/obj
 
-LIB_DIR		= ./lib/libft/ ./lib/libftprintf/
+LIB_DIR		= ./lib/libft/
 
 SRCS		= $(wildcard $(SRC_DIR)/*.c)
 
-LIBS		= ./lib/libft/libft.a ./lib/libftprintf/libftprintf.a
+LIBS		= ./lib/libft/libft.a
 
 OBJS		= $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
@@ -42,7 +42,6 @@ ${NAME}:	${OBJS} library
 
 library:
 			$(MAKE) -C ./lib/libft
-			$(MAKE) -C ./lib/libftprintf
 
 $(OBJ_DIR)/%.o:		$(SRC_DIR)/%.c
 					mkdir -p $(OBJ_DIR)
@@ -54,12 +53,10 @@ debug:		${OBJS} library
 clean:
 			rm -rf $(OBJ_DIR)
 			$(MAKE) -C ./lib/libft clean
-			$(MAKE) -C ./lib/libftprintf clean
 
 fclean:		clean
 			rm -rf $(BIN_DIR)
 			$(MAKE) -C ./lib/libft fclean
-			$(MAKE) -C ./lib/libftprintf fclean
 
 re:			fclean all
 
