@@ -6,7 +6,7 @@
 #    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2024/08/19 13:24:38 by mkling           ###   ########.fr        #
+#    Updated: 2024/08/22 19:07:04 by mkling           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,11 +14,7 @@ NAME		= pipex
 
 SRC_DIR		= ./src
 
-BUILD_DIR	= ./build
-
-BIN_DIR		= ./build/bin
-
-OBJ_DIR		= ./build/obj
+BIN_DIR		= ./bin
 
 LIB_DIR		= ./lib/libft/
 
@@ -26,7 +22,7 @@ SRCS		= $(wildcard $(SRC_DIR)/*.c)
 
 LIBS		= ./lib/libft/libft.a
 
-OBJS		= $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+OBJS		= $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRCS))
 
 CC			= cc
 
@@ -35,29 +31,26 @@ CFLAGS		= -Wall -Wextra -Werror
 
 all:		${NAME}
 
-${NAME}:	${OBJS} library
-			mkdir -p $(BUILD_DIR)
-			mkdir -p $(OBJ_DIR)
+${NAME}:	${OBJS}
+			$(MAKE) -C ./lib/libft
 			$(CC) $(CFLAGS) -o $(NAME) $(SRCS) $(LIBS)
 
-library:
-			$(MAKE) -C ./lib/libft
-
-$(OBJ_DIR)/%.o:		$(SRC_DIR)/%.c
-					mkdir -p $(OBJ_DIR)
+$(BIN_DIR)/%.o:		$(SRC_DIR)/%.c
+					mkdir -p $(BIN_DIR)
 					$(CC) $(CFLAGS) $(foreach dir,$(LIB_DIR), -I$(dir)) -c $< -o $@
 
-debug:		${OBJS} library
+debug:		${OBJS}
+			$(MAKE) -C ./lib/libft
 			$(CC) $(CFLAGS) -g -o $(NAME) $(SRCS) $(LIBS)
 
 clean:
-			rm -rf $(OBJ_DIR)
+			rm -rf $(BIN_DIR)
 			$(MAKE) -C ./lib/libft clean
 
 fclean:		clean
-			rm -rf $(BIN_DIR)
+			rm -rf pipex
 			$(MAKE) -C ./lib/libft fclean
 
 re:			fclean all
 
-.PHONY:		all clean fclean re
+.PHONY:		all clean fclean re debug
