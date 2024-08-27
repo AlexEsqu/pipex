@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/20 18:00:06 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/27 17:50:28 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int	check_viable_path(t_command *cmd, char *paths)
 		i++;
 	}
 	free_array(possible_paths);
-	return (perror("No viable path found to this command"), 1);
+	return (perror("No viable path found to this command"), 127);
 }
 
 int	extract_path(char **envp, t_command *cmd)
@@ -72,6 +72,7 @@ int	extract_path(char **envp, t_command *cmd)
 		}
 	}
 	cmd->cmd_path = NULL;
+	cmd->cmd_env = envp;
 	return (perror("No PATH variable found"), 1);
 }
 
@@ -81,7 +82,7 @@ int	parse_cmd(char *cmd_line, char **envp, t_command *cmd)
 	if (cmd->cmd_argv == NULL || cmd->cmd_argv[0] == NULL)
 	{
 		perror("Wrong Command syntax");
-		return (1);
+		return (127);
 	}
 	cmd->cmd_stem = ft_strjoin("/", cmd->cmd_argv[0]);
 	if (access(cmd->cmd_stem, F_OK | R_OK) == 0)
@@ -94,6 +95,8 @@ int	parse_cmd(char *cmd_line, char **envp, t_command *cmd)
 void	free_cmd(t_command *cmd)
 {
 	free_array(cmd->cmd_argv);
-	free(cmd->cmd_stem);
+	if (cmd->cmd_stem != NULL)
+		free(cmd->cmd_stem);
+	if (cmd->cmd_path != NULL)
 	free(cmd->cmd_path);
 }

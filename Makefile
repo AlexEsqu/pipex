@@ -6,7 +6,7 @@
 #    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2024/08/22 19:07:04 by mkling           ###   ########.fr        #
+#    Updated: 2024/08/22 19:08:15 by mkling           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ SRC_DIR		= ./src
 
 BIN_DIR		= ./bin
 
-LIB_DIR		= ./lib/libft/
+LIB_DIR		= ./lib/libft
 
 SRCS		= $(wildcard $(SRC_DIR)/*.c)
 

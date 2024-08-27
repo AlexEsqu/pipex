@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/21 18:11:10 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/27 17:31:04 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,8 @@ int	handle_pipe(char **argv, t_command *cmd1, t_command *cmd2, char **envp)
 	close(pipe_fd[READ]);
 	close(pipe_fd[WRITE]);
 	waitpid(pid_fork1, &status, 0);
+	cmd2->cmd_exit_status = WEXITSTATUS(status);
+	printf("exit cmd1 = %d\n", status);
 	waitpid(pid_fork2, &status, 0);
 	cmd2->cmd_exit_status = WEXITSTATUS(status);
 	return (0);
@@ -80,16 +82,18 @@ int	main(int argc, char **argv, char *envp[])
 {
 	t_command	cmd1;
 	t_command	cmd2;
+	int			status;
 
 	if (argc == 5)
 	{
-		if ((parse_cmd(argv[CMD_1], envp, &cmd1) == 1)
-			|| (parse_cmd(argv[CMD_2], envp, &cmd2) == 1))
-			return (1);
+		parse_cmd(argv[CMD_1], envp, &cmd1);
+		if (parse_cmd(argv[CMD_2], envp, &cmd2) !=  0)
+			return (127);
 		handle_pipe(argv, &cmd1, &cmd2, envp);
+		status = cmd2.cmd_exit_status;
 		free_cmd(&cmd1);
 		free_cmd(&cmd2);
-		return (cmd2.cmd_exit_status);
+		return (status);
 	}
 	return (perror("Invalid number of arguments"), 1);
 }

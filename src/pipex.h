@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/20 18:21:40 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/27 17:44:09 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ typedef struct s_command {
 	char	**cmd_argv;
 	char	*cmd_stem;
 	char	*cmd_path;
+	char	**cmd_env;
 	int		cmd_exit_status;
 }	t_command;
 
