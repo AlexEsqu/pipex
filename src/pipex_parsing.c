@@ -6,97 +6,91 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/27 17:50:28 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/28 17:43:59 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	free_array(char **array)
+static void	free_array(char **array)
 {
 	int	i;
 
 	i = 0;
-	if (array == NULL)
-		return ;
 	while (array[i] != NULL)
-	{
-		free(array[i]);
 		i++;
+	while (i > 0)
+	{
+		i--;
+		free(array[i]);
 	}
 	free(array);
 }
 
-int	check_viable_path(t_command *cmd, char *paths)
-{
-	char	*tested_path;
-	char	**possible_paths;
-	int		i;
-
-	possible_paths = ft_split(paths, ':');
-	free(paths);
-	i = 0;
-	while (possible_paths[i] != NULL)
-	{
-		tested_path = cmd->cmd_stem;
-		if (possible_paths[i] == NULL)
-			break ;
-		tested_path = ft_strjoin(possible_paths[i], cmd->cmd_stem);
-		if (access(tested_path, F_OK | R_OK) == 0)
-		{
-			free_array(possible_paths);
-			cmd->cmd_path = tested_path;
-			return (0);
-		}
-		else
-			free(tested_path);
-		i++;
-	}
-	free_array(possible_paths);
-	return (perror("No viable path found to this command"), 127);
-}
-
-int	extract_path(char **envp, t_command *cmd)
+static char	*extract_path_variable(char **envp)
 {
 	char	*paths;
-	int		i;
 
 	paths = NULL;
-	i = 0;
 	while (*envp++)
 	{
 		if (ft_strncmp(*envp, "PATH=", 5) == 0)
 		{
 			paths = ft_substr(*envp, 5, ft_strlen(*envp));
-			return (check_viable_path(cmd, paths));
+			if (!paths)
+				return (perror("Failed to allocate for extracted path"), NULL);
+			return (paths);
 		}
 	}
-	cmd->cmd_path = NULL;
-	cmd->cmd_env = envp;
-	return (perror("No PATH variable found"), 1);
+	return (perror("No PATH variable found"), NULL);
 }
 
-int	parse_cmd(char *cmd_line, char **envp, t_command *cmd)
+static char	*return_accessible_path(char *path_variable, char *cmd)
 {
-	cmd->cmd_argv = ft_split(cmd_line, ' ');
-	if (cmd->cmd_argv == NULL || cmd->cmd_argv[0] == NULL)
+	char	**possible_paths;
+	char	*tested_path;
+
+	possible_paths = ft_split(path_variable, ':');
+	free(path_variable);
+	while (*possible_paths++ != NULL)
 	{
-		perror("Wrong Command syntax");
-		return (127);
+		tested_path = ft_strjoin(*possible_paths, cmd);
+		if (!tested_path)
+			return (perror("Failed to allocate for tested command path"), NULL);
+		if (access(tested_path, F_OK | R_OK) == 0)
+		{
+			free_array(possible_paths);
+			return (tested_path);
+		}
+		else
+			free(tested_path);
 	}
-	cmd->cmd_stem = ft_strjoin("/", cmd->cmd_argv[0]);
-	if (access(cmd->cmd_stem, F_OK | R_OK) == 0)
-		cmd->cmd_path = ft_strdup(cmd->cmd_stem);
-	else
-		return (extract_path(envp, cmd));
-	return (0);
+	free_array(possible_paths);
+	return (perror("No viable path found to this command"), NULL);
 }
 
-void	free_cmd(t_command *cmd)
+char	**get_cmd_argv(char *cmd_string)
 {
-	free_array(cmd->cmd_argv);
-	if (cmd->cmd_stem != NULL)
-		free(cmd->cmd_stem);
-	if (cmd->cmd_path != NULL)
-	free(cmd->cmd_path);
+	char	**cmd_argv;
+
+	if (cmd_string == NULL || cmd_string[0] == '\0')
+		return (perror("Empty Command"), NULL);
+	cmd_argv = ft_split(cmd_string, ' ');
+	if (!cmd_argv[0])
+		return (perror("Failed to allocate the command string"), NULL);
+	return (cmd_argv);
+}
+
+char	*get_cmd_path(char *cmd, char **envp)
+{
+	char	*cmd_path;
+
+	cmd_path = NULL;
+	cmd = ft_strjoin("/", cmd);
+	if (!cmd)
+		return (perror("Failed to allocate the command string"), NULL);
+	if (access(cmd, F_OK | R_OK) == 0)
+		return (cmd);
+	cmd_path = (return_accessible_path(extract_path_variable(envp), cmd_path));
+	return (cmd_path);
 }

@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/08/27 17:44:09 by mkling           ###   ########.fr       */
+/*   Updated: 2024/08/28 17:32:32 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,15 +34,8 @@ enum e_argv_index {
 	CMD_2 = 3,
 	OUTFILE = 4,
 };
-typedef struct s_command {
-	char	**cmd_argv;
-	char	*cmd_stem;
-	char	*cmd_path;
-	char	**cmd_env;
-	int		cmd_exit_status;
-}	t_command;
 
-int		parse_cmd(char *cmd_line, char **envp, t_command *cmd);
-void	free_cmd(t_command *cmd);
+char	**get_cmd_argv(char *cmd_string);
+char	*get_cmd_path(char *cmd, char **envp);
 
 #endif
