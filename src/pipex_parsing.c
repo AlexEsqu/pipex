@@ -49,12 +49,15 @@ static char	*return_accessible_path(char *path_variable, char *cmd)
 {
 	char	**possible_paths;
 	char	*tested_path;
+	int		i;
 
+	i = 0;
 	possible_paths = ft_split(path_variable, ':');
+	tested_path = NULL;
 	free(path_variable);
-	while (*possible_paths++ != NULL)
+	while (possible_paths[i])
 	{
-		tested_path = ft_strjoin(*possible_paths, cmd);
+		tested_path = ft_strjoin(possible_paths[i], cmd);
 		if (!tested_path)
 			return (perror("Failed to allocate for tested command path"), NULL);
 		if (access(tested_path, F_OK | R_OK) == 0)
@@ -62,8 +65,8 @@ static char	*return_accessible_path(char *path_variable, char *cmd)
 			free_array(possible_paths);
 			return (tested_path);
 		}
-		else
-			free(tested_path);
+		free(tested_path);
+		i++;
 	}
 	free_array(possible_paths);
 	return (perror("No viable path found to this command"), NULL);
@@ -91,6 +94,6 @@ char	*get_cmd_path(char *cmd, char **envp)
 		return (perror("Failed to allocate the command string"), NULL);
 	if (access(cmd, F_OK | R_OK) == 0)
 		return (cmd);
-	cmd_path = (return_accessible_path(extract_path_variable(envp), cmd_path));
+	cmd_path = (return_accessible_path(extract_path_variable(envp), cmd));
 	return (cmd_path);
 }
