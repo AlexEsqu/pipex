@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/02 14:22:44 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/04 17:02:40 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,11 @@ enum e_file_type {
 	WRITE = 1
 };
 
+enum e_pipe_type {
+	CURRENT = 0,
+	PREVIOUS = 1
+};
+
 enum e_argv_index {
 	PROGRAM_NAME = 0,
 	INFILE = 1,
@@ -37,5 +42,9 @@ enum e_argv_index {
 
 char	**get_cmd_argv(char *cmd_string);
 char	*get_cmd_path(char *cmd, char **envp);
+int		is_even(int num);
+int		is_last_command(int cmd_index, int argc);
+int		is_first_command(int cmd_index);
+int		redirect(int newfd, int oldfd);
 
 #endif

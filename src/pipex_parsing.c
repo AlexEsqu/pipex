@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/04 13:46:33 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/04 16:23:22 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,6 @@ char	**get_cmd_argv(char *cmd_string)
 {
 	char	**cmd_argv;
 
-	//fprintf(stderr, "command string to be cut = %s\n", cmd_string);
 	if (cmd_string == NULL || cmd_string[0] == '\0')
 		return (perror("Empty Command"), NULL);
 	cmd_argv = ft_split(cmd_string, ' ');
@@ -93,7 +92,6 @@ char	*get_cmd_path(char *cmd, char **envp)
 	cmd = ft_strjoin("/", cmd);
 	if (!cmd)
 		return (perror("Failed to allocate the command string"), NULL);
-	//fprintf(stderr, "cmd stem is = %s\n", cmd);
 	if (access(cmd, F_OK | R_OK) == 0)
 		return (cmd);
 	cmd_path = return_accessible_path(envp, cmd);
