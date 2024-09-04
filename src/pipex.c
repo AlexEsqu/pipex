@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/02 15:28:46 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/04 14:47:32 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,12 @@ int	open_file(char *filepath, int mode)
 {
 	int	file_fd;
 
+	fprintf(stderr, "filepath to open = %s\n", filepath);
+	file_fd = 0;
 	if (mode == READ)
-		file_fd = open(file_fd, O_RDWR);
+		file_fd = open(filepath, O_RDWR);
 	else
-		file_fd = open(file_fd, O_WRONLY | O_TRUNC | O_CREAT);
+		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT);
 	if (file_fd == -1)
 		return (perror("Error while opening file"), -1);
 	return (file_fd);
@@ -27,139 +29,78 @@ int	open_file(char *filepath, int mode)
 
 int	redirect(int newfd, int oldfd)
 {
+	if (newfd == -1 || oldfd == -1)
+		return (-1);
 	if (dup2(newfd, oldfd) == -1)
 		return (perror("Error while redirecting to file"), -1);
 	close(newfd);
 	return (0);
 }
 
-int	execute_cmd_tru_pipe(int pipe_fd[], char **argv, char **envp, int index)
+int	exec_cmd(int pipe_fd[], char **argv,
+	char **envp, int cmd_index)
 {
 	char	**cmd_argv;
 	char	*cmd_path;
 
+	if (redirect(open_file(argv[INFILE], READ), STDIN_FILENO) == -1
+		|| redirect(pipe_fd[WRITE], STDOUT_FILENO) == -1)
+		return (perror("Error while redirecting pipe write to stdout"), -1);
 	close(pipe_fd[READ]);
-	cmd_argv = get_cmd_argv(argv[index]);
+	cmd_argv = get_cmd_argv(argv[cmd_index]);
 	cmd_path = get_cmd_path(cmd_argv[0], envp);
-	if (redirect(pipe_fd[WRITE], STDOUT_FILENO) == -1 || cmd_path == NULL)
-		exit(-1);
+	if (cmd_argv == NULL || cmd_path == NULL)
+		exit(1);
+	fprintf(stderr, "first cmd to be exec = %s\n", cmd_path);
 	execve(cmd_path, cmd_argv, envp);
 	return (perror("Error while executing command"), 127);
 }
 
-// int	exec_first_cmd_from_infile_to_pipe(int pipe_fd[], char **argv,
-// 	char **envp, int cmd_index)
-// {
-// 	char	**cmd_argv;
-// 	char	*cmd_path;
+int	exec_last_cmd(char **argv, char **envp, int cmd_index)
+{
+	char	**cmd_argv;
+	char	*cmd_path;
 
-// 	close(pipe_fd[READ]);
-// 	if (dup2(pipe_fd[WRITE], STDOUT_FILENO) == -1)
-// 		return (perror("Error while redirecting pipe write to stdout"), -1);
-// 	close(pipe_fd[WRITE]);
-// 	cmd_argv = get_cmd_argv(argv[cmd_index]);
-// 	cmd_path = get_cmd_path(cmd_argv[0], envp);
-// 	if (cmd_argv == NULL || cmd_path == NULL)
-// 		exit(1);
-// 	execve(cmd_path, cmd_argv, envp);
-// 	return (perror("Error while executing reading command"), 127);
-// }
-
-// int	exec_middle_cmd_from_pipe_to_pipe(int pipe_fd[], char **argv,
-// 	char **envp, int cmd_index)
-// {
-// 	char	**cmd_argv;
-// 	char	*cmd_path;
-
-// 	close(pipe_fd[WRITE]);
-// 	cmd_argv = get_cmd_argv(argv[cmd_index]);
-// 	cmd_path = get_cmd_path(cmd_argv[0], envp);
-// 	execve(cmd_path, cmd_argv, envp);
-// 	return (perror("Error while executing reading command"), 127);
-// }
-
-// int	exec_last_cmd_from_pipe_to_outfile(int pipe_fd[], char **argv,
-// 	char **envp, int cmd_index)
-// {
-// 	int		outfile_fd;
-// 	char	**cmd_argv;
-// 	char	*cmd_path;
-
-// 	redirect_to_filepath(argv[argc])
-// 	close(pipe_fd[WRITE]);
-// 	if (dup2(pipe_fd[READ], STDIN_FILENO) == -1)
-// 		return (perror("Error while redirecting pipe read to stdin"), 1);
-// 	close(pipe_fd[READ]);
-// 	if (dup2(outfile_fd, STDOUT_FILENO) == -1)
-// 		return (perror("Error while redirecting stdout to outfile"), 1);
-// 	close(outfile_fd);
-// 	cmd_argv = get_cmd_argv(argv[cmd_index]);
-// 	cmd_path = get_cmd_path(cmd_argv[0], envp);
-// 	execve(cmd_path, cmd_argv, envp);
-// 	return (perror("Error while executing reading command"), 127);
-// }
+	if (redirect(open_file(argv[cmd_index + 1], WRITE), STDOUT_FILENO) == -1)
+		return (perror("Error while redirecting pipe write to outfile"), -1);
+	cmd_argv = get_cmd_argv(argv[cmd_index]);
+	cmd_path = get_cmd_path(cmd_argv[0], envp);
+	fprintf(stderr, "cmd to be exec = %s\n", cmd_path);
+	execve(cmd_path, cmd_argv, envp);
+	return (perror("Error while executing command"), 127);
+}
 
 int	lay_pipe(char **argv, char **envp, int cmd_index)
 {
 	int	pipe_fd[2];
 	int	fork_pid;
-	int	exit_status;
 
+	fprintf(stderr, "in fork\n");
 	if (pipe(pipe_fd) == -1)
 		return (perror("Error while creating pipe"), -1);
 	fork_pid = fork();
 	if (fork_pid == -1)
 		return (perror("Error while forking"), -1);
 	if (fork_pid == 0)
-		exec_cmd_thru_pipe(pipe_fd, argv, envp, cmd_index);
-	close(pipe_fd[READ]);
+		exec_cmd(pipe_fd, argv, envp, cmd_index);
 	close(pipe_fd[WRITE]);
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	waitpid(fork_pid, &exit_status, 0);
+	if (dup2(pipe_fd[READ], STDIN_FILENO) == -1)
+		return (perror("Error while redirecting pipe to stdin"), -1);
 	return (0);
 }
-
-// int	set_files_as_stdin_n_out(char *infile_path, char *outfile_path)
-// {
-// 	int	infile_fd;
-// 	int	outfile_fd;
-
-// 	infile_fd = open(infile_path, O_RDWR);
-// 	if (infile_fd == -1)
-// 		perror("Error while opening infile");
-// 	outfile_fd = open(outfile_path, O_WRONLY | O_TRUNC | O_CREAT);
-// 	if (outfile_fd == -1)
-// 		return (perror("Error while opening outfile"), 1);
-// 	if (dup2(infile_fd, STDIN_FILENO) == -1)
-// 		return (perror("Error while redirecting infile to stdin"), 1);
-// 	if (dup2(outfile_fd, STDOUT_FILENO) == -1)
-// 		return (perror("Error while redirecting stdout to outfile"), 1);
-// 	close(infile_fd);
-// 	close(outfile_fd);
-// 	return (0);
-// }
 
 int	main(int argc, char **argv, char *envp[])
 {
 	int	cmd_index;
-	int	infile_fd;
-	int	exit_status;
 
-	exit_status = 0;
+	if (argc < 5)
+		return (perror("Invalid number of arguments"), 1);
 	cmd_index = CMD_1;
-	while (argc >= 5)
+	while (cmd_index < argc - 2)
 	{
-		infile_fd = open_file(argv[INFILE], READ);
-		if (infile_fd == -1 || redirect_to_file(infile_fd, STDIN_FILENO) == -1)
+		if (lay_pipe(argv, envp, cmd_index) == -1)
 			return (-1);
-		while (cmd_index < argc - 1)
-		{
-			if (lay_pipe(argc, argv, envp, cmd_index) == -1)
-				return (-1);
-			cmd_index++;
-		}
-		return (exit_status);
+		cmd_index++;
 	}
-	return (perror("Invalid number of arguments"), 1);
+	exec_last_cmd(argv, envp, cmd_index);
 }
