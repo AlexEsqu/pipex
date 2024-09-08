@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/08 17:55:24 by mkling           ###   ########.fr       */
+/*   Created: 2024/09/04 15:31:54 by mkling            #+#    #+#             */
+/*   Updated: 2024/09/08 17:48:09 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "../src/pipex.h"
 
 int	connect_pipe(int pipe_fd[], char **argv,
 	int cmd_index)
@@ -53,6 +53,20 @@ int	exec_cmd(int pipe_fd[], char **argv,
 	return (perror("Error while executing command"), 127);
 }
 
+int	accumulate_here_doc()
+{
+	if (redirect(open_file("tmp/.heredoc", TMP),
+		STDOUT_FILENO) == -1)
+
+	return (0);
+}
+
+int	here_doc_pipex(int *pipe_fd, int *fork_id, char **argv, char **envp)
+{
+
+	exec_cmd(NULL, argv, envp, H_CMD_2);
+}
+
 int	main(int argc, char **argv, char *envp[])
 {
 	int	pipe_fd[2];
@@ -62,8 +76,8 @@ int	main(int argc, char **argv, char *envp[])
 	if (argc < 5)
 		return (perror("Invalid number of arguments"), -1);
 	cmd_index = CMD_1;
-	if (strcmp(argv[INFILE], "HERE_DOC") == 0)
-		return (here_doc_pipex(argv, envp));
+	if (strcmp(argv[H_HERE_DOC], "HERE_DOC") == 0)
+		return (here_doc_pipex(pipe_fd, &fork_pid, argv, envp));
 	while (cmd_index < argc - 2)
 	{
 		if (create_pipe_and_fork(pipe_fd, &fork_pid) == -1)
