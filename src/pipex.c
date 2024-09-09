@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/08 17:55:24 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/09 13:14:32 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,9 +61,9 @@ int	main(int argc, char **argv, char *envp[])
 
 	if (argc < 5)
 		return (perror("Invalid number of arguments"), -1);
-	cmd_index = CMD_1;
 	if (strcmp(argv[INFILE], "HERE_DOC") == 0)
-		return (here_doc_pipex(argv, envp));
+		return (adjust_for_heredoc(argc, argv, envp));
+	cmd_index = CMD_1;
 	while (cmd_index < argc - 2)
 	{
 		if (create_pipe_and_fork(pipe_fd, &fork_pid) == -1)

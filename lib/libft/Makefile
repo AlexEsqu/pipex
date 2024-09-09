@@ -6,7 +6,7 @@
 #    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/20 10:20:10 by mkling            #+#    #+#              #
-#    Updated: 2024/08/07 11:23:30 by mkling           ###   ########.fr        #
+#    Updated: 2024/09/08 19:43:40 by mkling           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ SRCS 	= ft_atoi.c ft_bzero.c ft_calloc.c ft_isalnum.c ft_isalpha.c \
 		ft_striteri.c ft_putchar_fd.c ft_putstr_fd.c ft_putendl_fd.c \
 		ft_putnbr_fd.c ft_lstnew.c ft_lstadd_front.c ft_lstsize.c ft_lstlast.c \
 		ft_lstadd_back.c ft_lstdelone.c ft_lstclear.c ft_lstiter.c \
-		ft_lstmap.c
+		ft_lstmap.c get_next_input.c
 
 OBJS	= ${SRCS:.c=.o}
 
@@ -38,7 +38,7 @@ ${NAME}:	${OBJS}
 			$(CC) $(CFLAGS) -c $<
 
 clean:
-			rm -f $(OBJS) $(BOBJS)
+			rm -f $(OBJS)
 
 fclean:		clean
 			rm -f $(NAME)

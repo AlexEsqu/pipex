@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/08 17:48:48 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/08 21:21:23 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,5 +53,8 @@ int		redirect(int newfd, int oldfd);
 int		open_file(char *filepath, int mode);
 int		create_pipe_and_fork(int *pipe_fd, pid_t *fork_pid);
 int		close_and_wait_for_fork(int *pipe_fd, int fork_pid);
+int		adjust_for_heredoc(int argc, char **argv, char **envp);
+void	free_array(char **array);
+int		main(int argc, char **argv, char *envp[]);
 
 #endif

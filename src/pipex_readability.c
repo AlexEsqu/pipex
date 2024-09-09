@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 16:57:59 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/08 17:58:15 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/09 12:20:11 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,13 @@ int	open_file(char *filepath, int mode)
 	int	file_fd;
 
 	file_fd = 0;
+	fprintf(stderr, "file to open = %s\n", filepath);
 	if (mode == READ)
 		file_fd = open(filepath, O_RDONLY);
 	if (mode == WRITE)
 		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT);
 	if (mode == APPEND)
 		file_fd = open(filepath, O_WRONLY | O_APPEND | O_CREAT);
-	if (mode == TMP)
-		file_fd = open(filepath, O_RDWR | __O_TMPFILE);
 	if (file_fd == -1)
 		return (perror("Error while opening file"), -1);
 	return (file_fd);
