@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 16:57:59 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/09 12:20:11 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/09 17:37:21 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,15 @@ int	open_file(char *filepath, int mode)
 	int	file_fd;
 
 	file_fd = 0;
-	fprintf(stderr, "file to open = %s\n", filepath);
+	// fprintf(stderr, "file to open = %s\n", filepath);
 	if (mode == READ)
 		file_fd = open(filepath, O_RDONLY);
 	if (mode == WRITE)
 		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT);
 	if (mode == APPEND)
-		file_fd = open(filepath, O_WRONLY | O_APPEND | O_CREAT);
+		file_fd = open(filepath, O_RDWR | O_APPEND | O_CREAT);
+	if (mode == TMP)
+		file_fd = open(filepath, O_RDWR | O_TRUNC | O_CREAT);
 	if (file_fd == -1)
 		return (perror("Error while opening file"), -1);
 	return (file_fd);
@@ -59,6 +61,7 @@ int	close_and_wait_for_fork(int *pipe_fd, int fork_pid)
 	close(pipe_fd[WRITE]);
 	if (dup2(pipe_fd[READ], STDIN_FILENO) == -1)
 		return (perror("Error while redirecting pipe to stdin"), -1);
+	close(pipe_fd[READ]);
 	waitpid(fork_pid, NULL, 0);
 	return (0);
 }
