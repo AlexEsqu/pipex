@@ -6,18 +6,18 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/08 17:52:36 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/10 14:55:05 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/10 22:53:38 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	assemble_heredoc(char *limiter, char *heredoc_filepath)
+static int	assemble_heredoc(char *limiter, char *heredoc_filepath)
 {
 	int		heredoc_fd;
 	char	*result;
 
-	heredoc_fd = open_file(heredoc_filepath, APPEND);
+	heredoc_fd = open_file(heredoc_filepath, WRITE);
 	if (heredoc_fd == -1)
 		return (perror("Unable to create temp heredoc"), -1);
 	while (1)
@@ -32,7 +32,7 @@ int	assemble_heredoc(char *limiter, char *heredoc_filepath)
 	return (0);
 }
 
-char	**update_arguments(int argc, char **argv, char *heredoc_filepath)
+static char	**update_arguments(int argc, char **argv, char *heredoc_filepath)
 {
 	char	**updated_argv;
 	int		index;
@@ -58,11 +58,13 @@ int	adjust_for_heredoc(int argc, char **argv, char **envp)
 	char	*heredoc_filepath;
 	char	**updated_argv;
 	int		heredoc_fork_pid;
-	int		exit_return;
+	int		exit_code;
 
-	exit_return = 1;
+	if (argc < 6)
+		return (perror("Invalid number of arguments for HERE_DOC"), -1);
+	exit_code = 1;
 	heredoc_filepath = HEREDOC_FILEPATH;
-	if (assemble_heredoc(argv[H_LIMITER], heredoc_filepath) == -1)
+	if (assemble_heredoc(argv[INFILE + 1], heredoc_filepath) == -1)
 		return (-1);
 	updated_argv = update_arguments(argc, argv, heredoc_filepath);
 	if (!heredoc_filepath || !updated_argv)
@@ -72,10 +74,9 @@ int	adjust_for_heredoc(int argc, char **argv, char **envp)
 		return (perror("Error while forking"), -1);
 	if (heredoc_fork_pid == IS_FORK)
 		main(argc - 1, updated_argv, envp);
-	waitpid(heredoc_fork_pid, &exit_return, 0);
+	waitpid(heredoc_fork_pid, &heredoc_fork_pid, 0);
 	unlink(HEREDOC_FILEPATH);
 	ft_free_tab(updated_argv);
-	return (exit_return);
+	exit_code = WEXITSTATUS(heredoc_fork_pid);
+	return (exit_code);
 }
-
-

@@ -6,59 +6,52 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 16:57:59 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/10 15:34:57 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/10 21:51:59 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
-int	is_last_command(int *pipe_fd)
-{
-	return (pipe_fd == NULL);
-}
 
 int	redirect(int newfd, int oldfd)
 {
 	if (newfd == -1 || oldfd == -1)
 		return (-1);
 	if (dup2(newfd, oldfd) == -1)
+	{
+		close(newfd);
 		return (perror("Error while redirecting to file"), -1);
+	}
 	close(newfd);
 	return (0);
 }
 
-int	open_file(char *filepath, int mode)
+int	create_fork(pid_t *fork_pid)
 {
-	int	file_fd;
-
-	file_fd = 0;
-	if (mode == READ)
-		file_fd = open(filepath, O_RDONLY);
-	if (mode == WRITE)
-		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT, 0666);
-	if (mode == APPEND)
-		file_fd = open(filepath, O_RDWR | O_APPEND | O_CREAT, 0666);
-	if (file_fd == -1)
-		return (perror("Error while opening file"), 1);
-	return (file_fd);
-}
-
-int	create_pipe_and_fork(int *pipe_fd, pid_t *fork_pid)
-{
-	if (pipe(pipe_fd) == -1)
-		return (perror("Error while creating pipe"), -1);
 	*fork_pid = fork();
 	if (*fork_pid == -1)
 		return (perror("Error while forking"), -1);
 	return (0);
 }
 
-int	close_and_wait_for_fork(int *pipe_fd, int fork_pid)
+int	create_pipe(int *pipe_fd, char **argv, int cmd_index)
 {
+	if (!is_last_cmd(argv, cmd_index) && pipe(pipe_fd) == -1)
+		return (perror("Error while creating pipe"), -1);
+	return (0);
+}
+
+int	close_pipe(int *pipe_fd, char **argv, int cmd_index)
+{
+	if (is_last_cmd(argv, cmd_index))
+		return (0);
 	close(pipe_fd[WRITE]);
 	if (dup2(pipe_fd[READ], STDIN_FILENO) == -1)
 		return (perror("Error while redirecting pipe to stdin"), -1);
 	close(pipe_fd[READ]);
-	waitpid(fork_pid, NULL, 0);
 	return (0);
+}
+
+int	is_last_cmd(char **argv, int cmd_index)
+{
+	return (argv[cmd_index + 2] == NULL);
 }

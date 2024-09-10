@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/10 15:36:07 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/10 23:07:50 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 // 	{
 // 		if (fcntl(fd, F_GETFD) != -1)
 // 			fprintf(stderr, "File descriptor %d is open\n", fd++);
+// 		else
+// 			fd++;
 // 	}
 // }
 //
@@ -35,30 +37,25 @@
 
 static int	connect_pipe(int pipe_fd[], char **argv, int cmd_index)
 {
-	int	file_fd[2];
+	int	filefd[2];
 
+	if (is_last_cmd(argv, cmd_index))
+	{
+		filefd[WRITE] = open_file(argv[cmd_index + 1], WRITE);
+		if (filefd[WRITE] == -1 || redirect(filefd[WRITE], STDOUT_FILENO) == -1)
+			return (CANT_OPEN_FILE);
+		return (0);
+	}
 	if (cmd_index == CMD_1)
 	{
-		file_fd[READ] = open_file(argv[INFILE], READ);
-		if (file_fd[READ] == -1
-			|| redirect(file_fd[READ], STDIN_FILENO) == -1
-			|| redirect(pipe_fd[WRITE], STDOUT_FILENO) == -1)
-			return (GENERAL_ERROR);
-		close(pipe_fd[READ]);
+		filefd[READ] = open_file(argv[INFILE], READ);
+		if (filefd[READ] == -1 || redirect(filefd[READ], STDIN_FILENO) == -1)
+			return (CANT_OPEN_FILE);
 	}
-	else if (is_last_command(pipe_fd))
-	{
-		file_fd[WRITE] = open_file(argv[cmd_index + 1], WRITE);
-		if (file_fd[WRITE] == -1
-			|| redirect(file_fd[WRITE], STDOUT_FILENO) == -1)
-			return (GENERAL_ERROR);
-	}
-	else
-	{
-		if (redirect(pipe_fd[WRITE], STDOUT_FILENO) == -1)
-			return (GENERAL_ERROR);
-		close(pipe_fd[READ]);
-	}
+	if ((pipe_fd[WRITE] == -1 && cmd_index == CMD_1)
+		|| redirect(pipe_fd[WRITE], STDOUT_FILENO) == -1)
+		return (CANT_OPEN_FILE);
+	close(pipe_fd[READ]);
 	return (0);
 }
 
@@ -67,8 +64,8 @@ static int	exec_cmd(int pipe_fd[], char **argv, char **envp, int cmd_index)
 	char	**cmd_argv;
 	char	*cmd_path;
 
-	if (connect_pipe(pipe_fd, argv, cmd_index) == 1)
-		return (1);
+	if (connect_pipe(pipe_fd, argv, cmd_index) != OK)
+		exit(-1);
 	cmd_argv = get_cmd_argv(argv[cmd_index]);
 	cmd_path = get_cmd_path(cmd_argv[0], envp);
 	if (cmd_path == NULL)
@@ -76,9 +73,20 @@ static int	exec_cmd(int pipe_fd[], char **argv, char **envp, int cmd_index)
 	return (execve(cmd_path, cmd_argv, envp));
 }
 
+static int	wait_on_all_forks(int fork_pid)
+{
+	int	exit_code;
+
+	exit_code = 0;
+	waitpid(fork_pid, &exit_code, 0);
+	exit_code = WEXITSTATUS(exit_code);
+	waitpid(-1, NULL, 0);
+	return (exit_code);
+}
+
 int	main(int argc, char **argv, char *envp[])
 {
-	int	pipe_fd[4];
+	int	pipe_fd[2];
 	int	fork_pid;
 	int	cmd_index;
 
@@ -87,15 +95,16 @@ int	main(int argc, char **argv, char *envp[])
 	if (ft_strcmp(argv[INFILE], "HERE_DOC") == 0)
 		return (adjust_for_heredoc(argc, argv, envp));
 	cmd_index = CMD_1;
-	while (cmd_index < argc - 2)
+	while (cmd_index < argc - 1)
 	{
-		if (create_pipe_and_fork(pipe_fd, &fork_pid) == -1)
-			return (-1);
+		if ((create_pipe(pipe_fd, argv, cmd_index) != OK)
+			|| create_fork(&fork_pid) != OK)
+			return (GENERAL_ERROR);
 		if (fork_pid == IS_FORK)
 			exec_cmd(pipe_fd, argv, envp, cmd_index);
-		if (close_and_wait_for_fork(pipe_fd, fork_pid) == -1)
-			return (-1);
+		if (close_pipe(pipe_fd, argv, cmd_index) != OK)
+			return (GENERAL_ERROR);
 		cmd_index++;
 	}
-	return (exec_cmd(NULL, argv, envp, cmd_index));
+	return (wait_on_all_forks(fork_pid));
 }

@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/10 14:32:03 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/10 22:26:43 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,4 +83,20 @@ char	*get_cmd_path(char *cmd, char **envp)
 		return (cmd);
 	cmd_path = return_accessible_path(envp, cmd);
 	return (cmd_path);
+}
+
+int	open_file(char *filepath, int mode)
+{
+	int	file_fd;
+
+	file_fd = 0;
+	if (mode == READ)
+		file_fd = open(filepath, O_RDONLY);
+	if (mode == WRITE)
+		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT, 0666);
+	if (mode == APPEND)
+		file_fd = open(filepath, O_RDWR | O_APPEND | O_CREAT, 0666);
+	if (file_fd == -1)
+		return (perror("Error while opening file"), 1);
+	return (file_fd);
 }
