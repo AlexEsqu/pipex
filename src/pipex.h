@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/09 15:06:35 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/10 15:00:56 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,16 @@
 # include <errno.h>
 # include "../lib/libft/libft.h"
 
-# define IS_FORK == 0
+# define IS_FORK 0
+# define HEREDOC_FILEPATH "tmp/.heredoc"
+
+enum e_exit_num {
+	FAIL = -1,
+	OK = 0,
+	GENERAL_ERROR = 1,
+	CANT_EXCUTE_CMD = 126,
+	CANT_FIND_CMD = 127,
+};
 
 enum e_file_type {
 	READ = 0,
@@ -58,9 +67,6 @@ int		open_file(char *filepath, int mode);
 int		create_pipe_and_fork(int *pipe_fd, pid_t *fork_pid);
 int		close_and_wait_for_fork(int *pipe_fd, int fork_pid);
 int		adjust_for_heredoc(int argc, char **argv, char **envp);
-void	free_array(char **array);
 int		main(int argc, char **argv, char *envp[]);
-int		exec_cmd(int pipe_fd[], char **argv, char **envp, int cmd_index);
-int		connect_pipe(int pipe_fd[], char **argv, int cmd_index);
 
 #endif

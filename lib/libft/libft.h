@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 14:15:08 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/09 12:43:32 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/10 13:56:15 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,5 +72,6 @@ t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 void	ft_lstdelone(t_list *lst, void (*del)(void *));
 char	*get_next_line(int fd);
 char	*ft_strjoinfree(char *s1, char const *s2);
+void	ft_free_tab(char **array);
 
 #endif

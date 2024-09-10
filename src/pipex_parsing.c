@@ -6,24 +6,11 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/08 18:25:05 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/10 14:32:03 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
-void	free_array(char **array)
-{
-	size_t	i;
-
-	i = 0;
-	while (array[i])
-	{
-		free(array[i]);
-		i++;
-	}
-	free(array);
-}
 
 static char	*extract_path_variable(char **envp)
 {
@@ -63,12 +50,12 @@ static char	*return_accessible_path(char **envp, char *cmd)
 			return (perror("Failed to allocate for tested command path"), NULL);
 		if (access(tested_path, F_OK | R_OK) == 0)
 		{
-			free_array(possible_paths);
+			ft_free_tab(possible_paths);
 			return (tested_path);
 		}
 		free(tested_path);
 	}
-	free_array(possible_paths);
+	ft_free_tab(possible_paths);
 	return (perror("No viable path found to this command"), NULL);
 }
 
