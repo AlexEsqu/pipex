@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/10 22:26:43 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/11 12:31:09 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,7 @@ static char	*return_accessible_path(char **envp, char *cmd)
 		if (!tested_path)
 			return (perror("Failed to allocate for tested command path"), NULL);
 		if (access(tested_path, F_OK | R_OK) == 0)
-		{
-			ft_free_tab(possible_paths);
-			return (tested_path);
-		}
+			return (ft_free_tab(possible_paths), tested_path);
 		free(tested_path);
 	}
 	ft_free_tab(possible_paths);
@@ -85,18 +82,21 @@ char	*get_cmd_path(char *cmd, char **envp)
 	return (cmd_path);
 }
 
-int	open_file(char *filepath, int mode)
+int	check_commands(char **argv, char **envp, int argc)
 {
-	int	file_fd;
+	char	**cmd_argv;
+	char	*cmd_path;
+	int		cmd_index;
 
-	file_fd = 0;
-	if (mode == READ)
-		file_fd = open(filepath, O_RDONLY);
-	if (mode == WRITE)
-		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT, 0666);
-	if (mode == APPEND)
-		file_fd = open(filepath, O_RDWR | O_APPEND | O_CREAT, 0666);
-	if (file_fd == -1)
-		return (perror("Error while opening file"), 1);
-	return (file_fd);
+	cmd_index = CMD_1;
+	while (cmd_index < argc - 1)
+	{
+		cmd_argv = get_cmd_argv(argv[cmd_index]);
+		cmd_path = get_cmd_path(cmd_argv[0], envp);
+		if (cmd_path == NULL)
+			return (CANT_FIND_CMD);
+		if (is_directory(cmd_path))
+			return (CMD_IS_DIRECTORY);
+	}
+	return (0);
 }

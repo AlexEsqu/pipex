@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/10 23:07:50 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/11 12:31:34 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,22 @@
 // check proc/<pid>/fd directory
 // obtain open fd running "ls -lrt" in shell
 
+int	open_file(char *filepath, int mode)
+{
+	int	file_fd;
+
+	file_fd = 0;
+	if (mode == READ)
+		file_fd = open(filepath, O_RDONLY);
+	if (mode == WRITE)
+		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT, 0666);
+	if (mode == APPEND)
+		file_fd = open(filepath, O_RDWR | O_APPEND | O_CREAT, 0666);
+	if (file_fd == -1)
+		return (perror("Error while opening file"), 1);
+	return (file_fd);
+}
+
 static int	connect_pipe(int pipe_fd[], char **argv, int cmd_index)
 {
 	int	filefd[2];
@@ -54,7 +70,7 @@ static int	connect_pipe(int pipe_fd[], char **argv, int cmd_index)
 	}
 	if ((pipe_fd[WRITE] == -1 && cmd_index == CMD_1)
 		|| redirect(pipe_fd[WRITE], STDOUT_FILENO) == -1)
-		return (CANT_OPEN_FILE);
+		return (PIPE_ERROR);
 	close(pipe_fd[READ]);
 	return (0);
 }
@@ -70,6 +86,8 @@ static int	exec_cmd(int pipe_fd[], char **argv, char **envp, int cmd_index)
 	cmd_path = get_cmd_path(cmd_argv[0], envp);
 	if (cmd_path == NULL)
 		exit(CANT_FIND_CMD);
+	if (is_directory(cmd_path))
+		return (perror("Command is a directory"), CMD_IS_DIRECTORY);
 	return (execve(cmd_path, cmd_argv, envp));
 }
 
@@ -94,6 +112,8 @@ int	main(int argc, char **argv, char *envp[])
 		return (perror("Invalid number of arguments"), -1);
 	if (ft_strcmp(argv[INFILE], "HERE_DOC") == 0)
 		return (adjust_for_heredoc(argc, argv, envp));
+	if (check_commands(argv, envp, argc) != 0)
+		return (perror("Command is a directory"), CMD_IS_DIRECTORY);
 	cmd_index = CMD_1;
 	while (cmd_index < argc - 1)
 	{
@@ -102,9 +122,8 @@ int	main(int argc, char **argv, char *envp[])
 			return (GENERAL_ERROR);
 		if (fork_pid == IS_FORK)
 			exec_cmd(pipe_fd, argv, envp, cmd_index);
-		if (close_pipe(pipe_fd, argv, cmd_index) != OK)
+		if (close_pipe(pipe_fd, argv, cmd_index++) != OK)
 			return (GENERAL_ERROR);
-		cmd_index++;
 	}
 	return (wait_on_all_forks(fork_pid));
 }
