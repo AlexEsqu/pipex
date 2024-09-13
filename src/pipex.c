@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/13 19:46:05 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/13 19:51:12 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,14 +72,11 @@ int	main(int argc, char **argv, char *envp[])
 	index = create_index(argc, argv, envp);
 	while (index->current_cmd <= index->last_cmd)
 	{
-		if (create_pipe(pipe_fd, index) != OK)
-			return (PIPE_ERROR);
-		if (create_fork(&fork_pid) != OK)
-			return (FORK_ERROR);
+		create_pipe(pipe_fd, index);
+		create_fork(&fork_pid);
 		if (fork_pid == IS_FORK)
 			exec_cmd(pipe_fd, index);
-		if (close_pipe(pipe_fd, index) != OK)
-			return (DUP_ERROR);
+		close_pipe(pipe_fd, index);
 		index->current_cmd++;
 	}
 	free_index(index);
