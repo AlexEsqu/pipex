@@ -6,124 +6,82 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:59:07 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/11 12:31:34 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/13 19:46:05 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-// TESTING FUNCTION :
-// void	check_open_fds(void)
-// {
-// 	int	fd;
-
-// 	fd = 0;
-// 	while (fd < 1024)
-// 	{
-// 		if (fcntl(fd, F_GETFD) != -1)
-// 			fprintf(stderr, "File descriptor %d is open\n", fd++);
-// 		else
-// 			fd++;
-// 	}
-// }
-//
-// ALTERNATIVE:
-// hang program (add while(1) or sleep(10000))
-// preferably in heredoc side function,
-// to have a fork executing last function
-// obtain pid running "./pipex &" in shell
-// check proc/<pid>/fd directory
-// obtain open fd running "ls -lrt" in shell
-
-int	open_file(char *filepath, int mode)
+static int	check_syntax(int argc, char **argv)
 {
-	int	file_fd;
-
-	file_fd = 0;
-	if (mode == READ)
-		file_fd = open(filepath, O_RDONLY);
-	if (mode == WRITE)
-		file_fd = open(filepath, O_WRONLY | O_TRUNC | O_CREAT, 0666);
-	if (mode == APPEND)
-		file_fd = open(filepath, O_RDWR | O_APPEND | O_CREAT, 0666);
-	if (file_fd == -1)
-		return (perror("Error while opening file"), 1);
-	return (file_fd);
-}
-
-static int	connect_pipe(int pipe_fd[], char **argv, int cmd_index)
-{
-	int	filefd[2];
-
-	if (is_last_cmd(argv, cmd_index))
+	if (argc < 5)
 	{
-		filefd[WRITE] = open_file(argv[cmd_index + 1], WRITE);
-		if (filefd[WRITE] == -1 || redirect(filefd[WRITE], STDOUT_FILENO) == -1)
-			return (CANT_OPEN_FILE);
-		return (0);
+		perror("Invalid number of arguments");
+		exit(SYNTAX_ERROR);
 	}
-	if (cmd_index == CMD_1)
+	if (argc < 6 && ft_strcmp(argv[INFILE], "HERE_DOC") == 0)
 	{
-		filefd[READ] = open_file(argv[INFILE], READ);
-		if (filefd[READ] == -1 || redirect(filefd[READ], STDIN_FILENO) == -1)
-			return (CANT_OPEN_FILE);
+		perror("Invalid arguments for here_doc"),
+		exit(SYNTAX_ERROR);
 	}
-	if ((pipe_fd[WRITE] == -1 && cmd_index == CMD_1)
-		|| redirect(pipe_fd[WRITE], STDOUT_FILENO) == -1)
-		return (PIPE_ERROR);
-	close(pipe_fd[READ]);
-	return (0);
+	return (OK);
 }
 
-static int	exec_cmd(int pipe_fd[], char **argv, char **envp, int cmd_index)
+static int	connect_pipe(int pipe_fd[], t_index *index)
 {
-	char	**cmd_argv;
-	char	*cmd_path;
-
-	if (connect_pipe(pipe_fd, argv, cmd_index) != OK)
-		exit(-1);
-	cmd_argv = get_cmd_argv(argv[cmd_index]);
-	cmd_path = get_cmd_path(cmd_argv[0], envp);
-	if (cmd_path == NULL)
-		exit(CANT_FIND_CMD);
-	if (is_directory(cmd_path))
-		return (perror("Command is a directory"), CMD_IS_DIRECTORY);
-	return (execve(cmd_path, cmd_argv, envp));
+	if (is_last_cmd(index))
+		return (replace_stdout_by_outfile(index->outfile));
+	if (is_first_cmd(index))
+		return (re_stdin_by_infile_stdout_by_pipe(index, pipe_fd));
+	return (replace_stdout_by_pipe_write(pipe_fd));
 }
 
-static int	wait_on_all_forks(int fork_pid)
+static int	exec_cmd(int pipe_fd[], t_index *index)
+{
+	t_cmd	*cmd;
+
+	if (connect_pipe(pipe_fd, index) != OK)
+		exit(index->exit_code);
+	cmd = get_cmd(index);
+	if (!cmd)
+		exit(index->exit_code);
+	execve(cmd->cmd_path, cmd->cmd_argv, index->envp);
+	return (perror("Failed command"), CANT_EXECUTE_CMD);
+}
+
+static int	wait_on_all_forks(int fork_pid, t_index *index)
 {
 	int	exit_code;
 
 	exit_code = 0;
 	waitpid(fork_pid, &exit_code, 0);
 	exit_code = WEXITSTATUS(exit_code);
-	waitpid(-1, NULL, 0);
+	waitpid(-1, 0, WNOHANG);
+	if (index->heredoc_flag)
+		unlink(HEREDOC_FILEPATH);
 	return (exit_code);
 }
 
 int	main(int argc, char **argv, char *envp[])
 {
-	int	pipe_fd[2];
-	int	fork_pid;
-	int	cmd_index;
+	int		pipe_fd[2];
+	int		fork_pid;
+	t_index	*index;
 
-	if (argc < 5)
-		return (perror("Invalid number of arguments"), -1);
-	if (ft_strcmp(argv[INFILE], "HERE_DOC") == 0)
-		return (adjust_for_heredoc(argc, argv, envp));
-	if (check_commands(argv, envp, argc) != 0)
-		return (perror("Command is a directory"), CMD_IS_DIRECTORY);
-	cmd_index = CMD_1;
-	while (cmd_index < argc - 1)
+	check_syntax(argc, argv);
+	index = create_index(argc, argv, envp);
+	while (index->current_cmd <= index->last_cmd)
 	{
-		if ((create_pipe(pipe_fd, argv, cmd_index) != OK)
-			|| create_fork(&fork_pid) != OK)
-			return (GENERAL_ERROR);
+		if (create_pipe(pipe_fd, index) != OK)
+			return (PIPE_ERROR);
+		if (create_fork(&fork_pid) != OK)
+			return (FORK_ERROR);
 		if (fork_pid == IS_FORK)
-			exec_cmd(pipe_fd, argv, envp, cmd_index);
-		if (close_pipe(pipe_fd, argv, cmd_index++) != OK)
-			return (GENERAL_ERROR);
+			exec_cmd(pipe_fd, index);
+		if (close_pipe(pipe_fd, index) != OK)
+			return (DUP_ERROR);
+		index->current_cmd++;
 	}
-	return (wait_on_all_forks(fork_pid));
+	free_index(index);
+	return (wait_on_all_forks(fork_pid, index));
 }

@@ -1,10 +1,1 @@
-total 36
-drwxr-xr-x 2 mkling 2024_paris   115 Sep 11 11:23 bin
--rwxrwxrwx 1 mkling 2024_paris    75 Sep 10 17:59 infile
-drwxr-xr-x 3 mkling 2024_paris    19 Sep  8 19:41 lib
--rw-r--r-- 1 mkling 2024_paris  1684 Sep  8 19:41 Makefile
--rw-r--r-- 1 mkling 2024_paris     0 Sep 11 11:27 out
--rwxrwxrwx 1 mkling 2024_paris     0 Sep 11 11:23 outfile
--rwxr-xr-x 1 mkling 2024_paris 27040 Sep 11 11:23 pipex
-drwxr-xr-x 2 mkling 2024_paris   130 Sep 11 10:38 src
-drwxrwxrwx 2 mkling 2024_paris    22 Sep 10 22:30 tmp
+BEEEP
