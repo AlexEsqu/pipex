@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/08 15:58:53 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/09 12:43:26 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/16 10:02:31 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ char	*ft_strjoinfree(char *s1, char const *s2)
 	free(s1);
 	return (result);
 }
-
 
 char	*read_till_newline(int fd, char *static_buffer)
 {

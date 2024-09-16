@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:36:04 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/13 18:38:37 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/16 10:11:23 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	find_accessible_path(t_index *index, t_cmd *cmd)
 		free(tested_path);
 	}
 	ft_free_tab(index->extracted_paths);
-	return (free_cmd_then_exit(cmd, "No path found", CANT_FIND_CMD, index));
+	return (free_cmd_then_exit(cmd, "No command found", CANT_FIND_CMD, index));
 }
 
 int	get_cmd_argv(t_cmd *cmd, t_index *index)

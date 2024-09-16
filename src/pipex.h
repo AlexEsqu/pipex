@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/13 18:56:38 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/16 10:06:27 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,10 +48,10 @@ typedef struct s_cmd {
 enum e_exit_num {
 	FAIL = -1,
 	INVALID_FD = -1,
-	SYNTAX_ERROR = -1,
-	MALLOC_FAIL = -1,
 	OK = 0,
+	MALLOC_FAIL = 1,
 	GENERAL_ERROR = 1,
+	SYNTAX_ERROR = 1,
 	PIPE_ERROR = 1,
 	FORK_ERROR = 1,
 	DUP_ERROR = 1,
@@ -83,20 +83,20 @@ enum e_typical_argv_index {
 // PARSING
 t_cmd	*get_cmd(t_index *index);
 int		check_cmd(t_cmd *cmd, t_index *index);
-int		free_cmd_then_exit(t_cmd *cmd, char *errnote, int errnum, t_index *index);
+int		free_cmd_then_exit(t_cmd *cmd, char *emess, int errnum, t_index *index);
 
 // INDEXING
-t_index		*create_index(int argc, char **argv, char **envp);
-int			extract_if_path_variable(t_index *index);
-int			free_index(t_index *index);
+t_index	*create_index(int argc, char **argv, char **envp);
+int		extract_if_path_variable(t_index *index);
+int		free_index(t_index *index);
 
 // READABILITY
-int		is_last_cmd(t_index *index);
 int		is_first_cmd(t_index *index);
+int		is_last_cmd(t_index *index);
 int		redirect(int newfd, int oldfd);
 int		open_file(char *filepath, int mode);
 int		create_pipe(int *pipe_fd, t_index *index);
-int		create_fork(pid_t *fork_pid);
+int		create_fork(pid_t *fork_pid, t_index *index);
 int		close_pipe(int *pipe_fd, t_index *index);
 int		is_directory(char *cmd);
 

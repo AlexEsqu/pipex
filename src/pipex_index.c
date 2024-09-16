@@ -6,7 +6,7 @@
 /*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 10:38:08 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/13 19:10:38 by mkling           ###   ########.fr       */
+/*   Updated: 2024/09/16 10:00:52 by mkling           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,4 +96,3 @@ t_index	*create_index(int argc, char **argv, char **envp)
 	index->exit_code = 0;
 	return (index);
 }
-
