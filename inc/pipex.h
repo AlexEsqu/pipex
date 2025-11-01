@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkling <mkling@student.42.fr>              +#+  +:+       +#+        */
+/*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:07:05 by mkling            #+#    #+#             */
-/*   Updated: 2024/09/16 10:06:27 by mkling           ###   ########.fr       */
+/*   Updated: 2025/11/01 17:57:14 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <sys/wait.h>
 # include <fcntl.h>
 # include <errno.h>
-# include "../lib/libft/libft.h"
+# include "libft.h"
 
 # define IS_FORK 0
 # define HEREDOC_FILEPATH "tmp/.heredoc"

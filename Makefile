@@ -3,56 +3,63 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mkling <mkling@student.42.fr>              +#+  +:+       +#+         #
+#    By: alex <alex@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2024/09/13 17:46:19 by mkling           ###   ########.fr        #
+#    Updated: 2025/11/01 18:17:03 by alex             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		= pipex
 
-SRC_DIR		= ./src
+SRC_DIR		= src
 
-BIN_DIR		= ./bin
+INC_DIR		= inc
 
-TMP_DIR		= ./tmp
+OBJ_DIR		= obj
 
-LIB_DIR		= ./lib/libft
+TMP_DIR		= tmp
 
-SRCS		= $(wildcard $(SRC_DIR)/*.c)
+SRC			= heredoc.c  index.c  main.c  parsing.c  pipe.c  readability.c
 
-LIBS		= ./lib/libft/libft.a
+SRCS		= $(addprefix $(SRC_DIR)/, $(SRC))
 
-OBJS		= $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRCS))
+LIB			= $(INC_DIR)/libft/libft.a
+
+HEADER		= $(INC_DIR)/pipex.h
+
+OBJ			= $(SRC:$(SRC_DIR)/%.c=$(DIR_OBJ)/%.o)
 
 CC			= cc
 
-CFLAGS		= -Wall -Wextra -Werror -g3
+CFLAGS		= -Wall -Wextra -Werror
 
 
-all:		${NAME}
+all:		$(NAME)
 
-${NAME}:	${OBJS}
-			$(MAKE) -C ./lib/libft
-			$(CC) $(CFLAGS) -o $(NAME) $(SRCS) $(LIBS)
+$(NAME):	$(OBJ)
+			$(MAKE) -C $(INC_DIR)/libft
+			$(CC) $(CFLAGS) -I$(INC_DIR) -I$(INC_DIR)/libft $(OBJ) -o $(NAME) $(LIB)
 
-$(BIN_DIR)/%.o:		$(SRC_DIR)/%.c
-					mkdir -p $(BIN_DIR)
+$(OBJ_DIR)/%.o:		$(SRC_DIR)/%.c
 					mkdir -p $(TMP_DIR)
-					$(CC) $(CFLAGS) $(foreach dir,$(LIB_DIR), -I$(dir)) -c $< -o $@
+					$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
-debug:		${OBJS}
-			$(MAKE) -C ./lib/libft
-			$(CC) $(CFLAGS) -g -o $(NAME) $(SRCS) $(LIBS)
+$(OBJ_DIR):
+					mkdir -p $@
+
+debug:
+			$(MAKE) -C $(INC_DIR)/libft
+			$(CC) $(CFLAGS) -g3 -I$(INC_DIR) $(SRCS) -o $(NAME)
 
 clean:
-			rm -rf $(BIN_DIR)
-			$(MAKE) -C ./lib/libft clean
+			rm -rf $(OBJ_DIR)
+			rm -rf $(TMP_DIR)
+			$(MAKE) -C $(INC_DIR)/libft clean
 
 fclean:		clean
 			rm -rf pipex
-			$(MAKE) -C ./lib/libft fclean
+			$(MAKE) -C $(INC_DIR)/libft fclean
 
 re:			fclean all
 
