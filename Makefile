@@ -6,7 +6,7 @@
 #    By: alex <alex@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/14 14:56:12 by mkling            #+#    #+#              #
-#    Updated: 2025/11/01 18:17:03 by alex             ###   ########.fr        #
+#    Updated: 2025/11/01 18:30:09 by alex             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ LIB			= $(INC_DIR)/libft/libft.a
 
 HEADER		= $(INC_DIR)/pipex.h
 
-OBJ			= $(SRC:$(SRC_DIR)/%.c=$(DIR_OBJ)/%.o)
+OBJ			= $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 CC			= cc
 
@@ -37,13 +37,13 @@ CFLAGS		= -Wall -Wextra -Werror
 
 all:		$(NAME)
 
-$(NAME):	$(OBJ)
+$(NAME):	$(OBJ_DIR) $(OBJ)
 			$(MAKE) -C $(INC_DIR)/libft
 			$(CC) $(CFLAGS) -I$(INC_DIR) -I$(INC_DIR)/libft $(OBJ) -o $(NAME) $(LIB)
 
 $(OBJ_DIR)/%.o:		$(SRC_DIR)/%.c
 					mkdir -p $(TMP_DIR)
-					$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
+					$(CC) $(CFLAGS)  -I$(INC_DIR)  -I$(INC_DIR)/libft/inc -c $< -o $@
 
 $(OBJ_DIR):
 					mkdir -p $@
